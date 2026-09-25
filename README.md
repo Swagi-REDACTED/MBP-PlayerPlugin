@@ -7,7 +7,7 @@ A custom player plugin for **MBP** that intercepts playback and redirects it int
 
 The project also includes a dedicated **DX12 launcher** for choosing the player backend, configuring MBP, and managing shared playback defaults.
 
-MBP itself is not modified THIS IS NOT A DRM BYPASS YOU MUST OWN MBP.
+MBP itself is not modified THIS IS NOT A DRM BYPASS YOU MUST HAVE A VALID ACTIVE SUBSCRIPTION WITH MBP.
 
 ---
 
