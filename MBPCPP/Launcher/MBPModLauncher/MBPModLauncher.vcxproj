@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32"><Configuration>Debug</Configuration><Platform>Win32</Platform></ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32"><Configuration>Release</Configuration><Platform>Win32</Platform></ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
+  </ItemGroup>
+
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>18.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{341ce4b7-9829-4461-806b-dc9c1cc009fd}</ProjectGuid>
+    <RootNamespace>MBPModLauncher</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType><UseDebugLibraries>true</UseDebugLibraries><PlatformToolset>v145</PlatformToolset><CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType><UseDebugLibraries>false</UseDebugLibraries><PlatformToolset>v145</PlatformToolset><WholeProgramOptimization>true</WholeProgramOptimization><CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType><UseDebugLibraries>true</UseDebugLibraries><PlatformToolset>v145</PlatformToolset><CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType><UseDebugLibraries>false</UseDebugLibraries><PlatformToolset>v145</PlatformToolset><WholeProgramOptimization>true</WholeProgramOptimization><CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Platform)'=='Win32' Or '$(Platform)'=='x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+
+  <PropertyGroup>
+    <OutDir>$(SolutionDir)build\Launcher\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>MBPModLauncher</TargetName>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp23</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>NOMINMAX;WIN32_LEAN_AND_MEAN;UNICODE;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Libs;$(ProjectDir)Libs\imgui;$(ProjectDir)Libs\imgui\backends;$(IntDir)ShaderBytecode;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;dwmapi.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Manifest><EnableSegmentHeap>true</EnableSegmentHeap></Manifest>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile><FunctionLevelLinking>true</FunctionLevelLinking><IntrinsicFunctions>true</IntrinsicFunctions><Optimization>MaxSpeed</Optimization></ClCompile>
+  </ItemDefinitionGroup>
+
+  <ItemGroup>
+    <ClCompile Include="App.cpp" />
+    <ClCompile Include="CockWrapper.CPP" />
+    <ClCompile Include="LauncherDefaultsPayload.CPP" />
+    <ClCompile Include="DX12Renderer.cpp" />
+    <ClCompile Include="HtmlUi.cpp" />
+    <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="ShaderEffects.cpp" />
+    <ClCompile Include="ShaderLoader.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Libs\imgui\imgui.cpp" />
+    <ClCompile Include="Libs\imgui\imgui_draw.cpp" />
+    <ClCompile Include="Libs\imgui\imgui_tables.cpp" />
+    <ClCompile Include="Libs\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Libs\imgui\backends\imgui_impl_dx12.cpp" />
+    <ClCompile Include="Libs\imgui\backends\imgui_impl_win32.cpp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ClInclude Include="App.hpp" />
+    <ClInclude Include="CockWrapper.HPP" />
+    <ClInclude Include="LauncherDefaultsPayload.HPP" />
+    <ClInclude Include="DX12Renderer.hpp" />
+    <ClInclude Include="HtmlUi.hpp" />
+    <ClInclude Include="Settings.hpp" />
+    <ClInclude Include="ShaderEffects.hpp" />
+    <ClInclude Include="ShaderLoader.h" />
+    <ClInclude Include="ShaderRegistry.generated.h" />
+    <ClInclude Include="main.hpp" />
+    <ClInclude Include="Libs\lucide_imgui.hpp" />
+    <ClInclude Include="Libs\poppins.h" />
+    <ClInclude Include="Libs\imgui\imgui.h" />
+    <ClInclude Include="Libs\imgui\imgui_internal.h" />
+    <ClInclude Include="Libs\imgui\backends\imgui_impl_dx12.h" />
+    <ClInclude Include="Libs\imgui\backends\imgui_impl_win32.h" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Shaders\Fullscreen.hlsl" />
+    <None Include="Shaders\Loading.hlsl" />
+    <None Include="Shaders\LauncherGlow.hlsl" />
+    <None Include="Shaders\Fluid.hlsl" />
+    <None Include="Shaders\GeminiSmoke.hlsl" />
+    <None Include="Shaders\MistGlow.hlsl" />
+    <None Include="Shaders\shader(LegacyLoader).cpp" />
+    <None Include="Libs\HtmlRenderer.hpp" />
+  </ItemGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+
+  <!-- Compile active HLSL before C++ so ShaderRegistry.generated.h can include the byte arrays.
+       Shader Model 6 makes Visual Studio select DXC while still using the standard FXC MSBuild task surface. -->
+  <Target Name="CompileEmbeddedShaders" BeforeTargets="ClCompile" Inputs="Shaders\Fullscreen.hlsl;Shaders\Loading.hlsl;Shaders\LauncherGlow.hlsl" Outputs="$(IntDir)ShaderBytecode\FullscreenVS.bytecode.h;$(IntDir)ShaderBytecode\LoadingPS.bytecode.h;$(IntDir)ShaderBytecode\LauncherGlowPS.bytecode.h">
+    <MakeDir Directories="$(IntDir)ShaderBytecode" />
+    <FXC Source="Shaders\Fullscreen.hlsl" ShaderType="Vertex" ShaderModel="6.0" EntryPointName="VSMain" HeaderFileOutput="$(IntDir)ShaderBytecode\FullscreenVS.bytecode.h" ObjectFileOutput="$(IntDir)ShaderBytecode\FullscreenVS.cso" VariableName="g_FullscreenVS" TreatWarningAsError="true" />
+    <FXC Source="Shaders\Loading.hlsl" ShaderType="Pixel" ShaderModel="6.0" EntryPointName="main" HeaderFileOutput="$(IntDir)ShaderBytecode\LoadingPS.bytecode.h" ObjectFileOutput="$(IntDir)ShaderBytecode\LoadingPS.cso" VariableName="g_LoadingPS" TreatWarningAsError="true" />
+    <FXC Source="Shaders\LauncherGlow.hlsl" ShaderType="Pixel" ShaderModel="6.0" EntryPointName="main" HeaderFileOutput="$(IntDir)ShaderBytecode\LauncherGlowPS.bytecode.h" ObjectFileOutput="$(IntDir)ShaderBytecode\LauncherGlowPS.cso" VariableName="g_LauncherGlowPS" TreatWarningAsError="true" />
+  </Target>
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

@@ -1,0 +1,333 @@
+<Application x:Class="MovieBoxPlayerMod.Player.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <Color x:Key="PlayerAccentColor">#FF62AEFF</Color>
+            <Color x:Key="PlayerAccentHoverColor">#FF83C0FF</Color>
+            <Color x:Key="PlayerTextColor">#FFF7FAFF</Color>
+            <Color x:Key="PlayerMutedTextColor">#B8DCE7F5</Color>
+            <Color x:Key="PlayerDimTextColor">#78DCE7F5</Color>
+            <Color x:Key="PlayerGlassColor">#DB101319</Color>
+            <Color x:Key="PlayerGlassSoftColor">#B50D1015</Color>
+            <Color x:Key="PlayerGlassHoverColor">#2BFFFFFF</Color>
+            <Color x:Key="PlayerBorderColor">#32FFFFFF</Color>
+            <Color x:Key="PlayerTrackColor">#42FFFFFF</Color>
+            <!-- Dedicated episode/season menu palette. These are intentionally independent
+                 from the generic player glass colors so the menu can be rethemed in one place. -->
+            <Color x:Key="PlayerMenuSurfaceColor">#F2141823</Color>
+            <Color x:Key="PlayerMenuBorderColor">#665C7CFF</Color>
+            <Color x:Key="PlayerMenuHoverColor">#343B5CCC</Color>
+            <Color x:Key="PlayerMenuSelectedColor">#594D72FF</Color>
+            <Color x:Key="PlayerMenuRailColor">#D90C1018</Color>
+            <Color x:Key="PlayerMenuTriggerSurfaceColor">#D7181E2A</Color>
+            <Color x:Key="PlayerMenuTriggerHoverColor">#EE222B3C</Color>
+            <Color x:Key="PlayerMenuTriggerPressedColor">#F12A3550</Color>
+            <Color x:Key="PlayerMenuTriggerBorderColor">#4D7DA9E8</Color>
+
+
+            <SolidColorBrush x:Key="PlayerAccentBrush" Color="{StaticResource PlayerAccentColor}" />
+            <SolidColorBrush x:Key="PlayerAccentHoverBrush" Color="{StaticResource PlayerAccentHoverColor}" />
+            <SolidColorBrush x:Key="PlayerTextBrush" Color="{StaticResource PlayerTextColor}" />
+            <SolidColorBrush x:Key="PlayerMutedTextBrush" Color="{StaticResource PlayerMutedTextColor}" />
+            <SolidColorBrush x:Key="PlayerDimTextBrush" Color="{StaticResource PlayerDimTextColor}" />
+            <SolidColorBrush x:Key="PlayerGlassBrush" Color="{StaticResource PlayerGlassColor}" />
+            <SolidColorBrush x:Key="PlayerGlassSoftBrush" Color="{StaticResource PlayerGlassSoftColor}" />
+            <SolidColorBrush x:Key="PlayerGlassHoverBrush" Color="{StaticResource PlayerGlassHoverColor}" />
+            <SolidColorBrush x:Key="PlayerBorderBrush" Color="{StaticResource PlayerBorderColor}" />
+            <SolidColorBrush x:Key="PlayerTrackBrush" Color="{StaticResource PlayerTrackColor}" />
+            <SolidColorBrush x:Key="PlayerMenuSurfaceBrush" Color="{StaticResource PlayerMenuSurfaceColor}" />
+            <SolidColorBrush x:Key="PlayerMenuBorderBrush" Color="{StaticResource PlayerMenuBorderColor}" />
+            <SolidColorBrush x:Key="PlayerMenuHoverBrush" Color="{StaticResource PlayerMenuHoverColor}" />
+            <SolidColorBrush x:Key="PlayerMenuSelectedBrush" Color="{StaticResource PlayerMenuSelectedColor}" />
+            <SolidColorBrush x:Key="PlayerMenuRailBrush" Color="{StaticResource PlayerMenuRailColor}" />
+            <SolidColorBrush x:Key="PlayerMenuTriggerSurfaceBrush" Color="{StaticResource PlayerMenuTriggerSurfaceColor}" />
+            <SolidColorBrush x:Key="PlayerMenuTriggerHoverBrush" Color="{StaticResource PlayerMenuTriggerHoverColor}" />
+            <SolidColorBrush x:Key="PlayerMenuTriggerPressedBrush" Color="{StaticResource PlayerMenuTriggerPressedColor}" />
+            <SolidColorBrush x:Key="PlayerMenuTriggerBorderBrush" Color="{StaticResource PlayerMenuTriggerBorderColor}" />
+
+
+            <Style x:Key="PlayerIconButtonStyle" TargetType="Button">
+                <Setter Property="Foreground" Value="{StaticResource PlayerTextBrush}" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="2,0" />
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="Cursor" Value="None" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Chrome"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Chrome" Property="Background" Value="{StaticResource PlayerGlassHoverBrush}" />
+                                    <Setter TargetName="Chrome" Property="BorderBrush" Value="#24FFFFFF" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Chrome" Property="Opacity" Value="0.62" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Chrome" Property="Opacity" Value="0.32" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="PlayerMenuTriggerButtonStyle" TargetType="Button">
+                <Setter Property="Foreground" Value="{StaticResource PlayerTextBrush}" />
+                <Setter Property="Background" Value="{StaticResource PlayerMenuTriggerSurfaceBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource PlayerMenuTriggerBorderBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Padding" Value="12,6" />
+                <Setter Property="Margin" Value="4,0" />
+                <Setter Property="MinWidth" Value="102" />
+                <Setter Property="Height" Value="34" />
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="Cursor" Value="None" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Chrome"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="11"
+                                    RenderTransformOrigin="0.5,0.5"
+                                    SnapsToDevicePixels="True">
+                                <Border.RenderTransform>
+                                    <ScaleTransform x:Name="TriggerScale" ScaleX="1" ScaleY="1" />
+                                </Border.RenderTransform>
+                                <Grid Margin="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="Tag" Value="Open">
+                                    <Setter TargetName="Chrome" Property="Background" Value="{StaticResource PlayerMenuSelectedBrush}" />
+                                    <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource PlayerAccentBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Chrome" Property="Background" Value="{StaticResource PlayerMenuTriggerHoverBrush}" />
+                                    <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource PlayerAccentHoverBrush}" />
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="TriggerScale" Storyboard.TargetProperty="ScaleX" To="1.025" Duration="0:0:0.10" />
+                                                <DoubleAnimation Storyboard.TargetName="TriggerScale" Storyboard.TargetProperty="ScaleY" To="1.025" Duration="0:0:0.10" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="TriggerScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.10" />
+                                                <DoubleAnimation Storyboard.TargetName="TriggerScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.10" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Chrome" Property="Background" Value="{StaticResource PlayerMenuTriggerPressedBrush}" />
+                                    <Setter TargetName="Chrome" Property="Opacity" Value="0.86" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Chrome" Property="Opacity" Value="0.38" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="PlayerPrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource PlayerIconButtonStyle}">
+                <Setter Property="Background" Value="{StaticResource PlayerAccentBrush}" />
+                <Setter Property="BorderBrush" Value="#55FFFFFF" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Chrome"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Chrome" Property="Background" Value="{StaticResource PlayerAccentHoverBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Chrome" Property="Opacity" Value="0.72" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="PlayerCloseButtonStyle" TargetType="Button" BasedOn="{StaticResource PlayerIconButtonStyle}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Chrome" Background="Transparent" CornerRadius="9">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Chrome" Property="Background" Value="#E8E81123" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Chrome" Property="Opacity" Value="0.7" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="PlayerTrackButtonStyle" TargetType="RepeatButton">
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="IsTabStop" Value="False" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RepeatButton">
+                            <Border Background="{TemplateBinding Background}"
+                                    Height="4"
+                                    CornerRadius="2"
+                                    VerticalAlignment="Center" />
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="PlayerThumbStyle" TargetType="Thumb">
+                <Setter Property="Width" Value="13" />
+                <Setter Property="Height" Value="13" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Thumb">
+                            <Grid>
+                                <Ellipse Fill="#45000000" Margin="-2" />
+                                <Ellipse x:Name="ThumbShape"
+                                         Fill="White"
+                                         Stroke="#44000000"
+                                         StrokeThickness="1" />
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="ThumbShape" Property="Fill" Value="{StaticResource PlayerAccentHoverBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsDragging" Value="True">
+                                    <Setter TargetName="ThumbShape" Property="Fill" Value="{StaticResource PlayerAccentBrush}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="PlayerSliderStyle" TargetType="Slider">
+                <Setter Property="Foreground" Value="{StaticResource PlayerAccentBrush}" />
+                <Setter Property="Background" Value="{StaticResource PlayerTrackBrush}" />
+                <Setter Property="Height" Value="24" />
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="Cursor" Value="None" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Slider">
+                            <Grid Background="Transparent">
+                                <Track x:Name="PART_Track"
+                                       VerticalAlignment="Center"
+                                       IsDirectionReversed="False">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Command="{x:Static Slider.DecreaseLarge}"
+                                                      Background="{TemplateBinding Foreground}"
+                                                      Style="{StaticResource PlayerTrackButtonStyle}" />
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb Style="{StaticResource PlayerThumbStyle}" />
+                                    </Track.Thumb>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Command="{x:Static Slider.IncreaseLarge}"
+                                                      Background="{TemplateBinding Background}"
+                                                      Style="{StaticResource PlayerTrackButtonStyle}" />
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+
+            <Style x:Key="PlayerTransparentTrackButtonStyle" TargetType="RepeatButton">
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="IsTabStop" Value="False" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RepeatButton">
+                            <Border Background="Transparent" />
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!--
+                Timeline-only slider: the visible bar/fill live underneath the Track so
+                they can reach the exact container edges. Extending PART_Track by half
+                the 13 px thumb width puts the thumb center exactly on 0% and 100%.
+            -->
+            <Style x:Key="PlayerTimelineSliderStyle" TargetType="Slider">
+                <Setter Property="Height" Value="24" />
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="Cursor" Value="None" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Slider">
+                            <Grid Background="Transparent" ClipToBounds="False">
+                                <Track x:Name="PART_Track"
+                                       Margin="-6.5,0"
+                                       VerticalAlignment="Center"
+                                       IsDirectionReversed="False">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Command="{x:Static Slider.DecreaseLarge}"
+                                                      Style="{StaticResource PlayerTransparentTrackButtonStyle}" />
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb Style="{StaticResource PlayerThumbStyle}" />
+                                    </Track.Thumb>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Command="{x:Static Slider.IncreaseLarge}"
+                                                      Style="{StaticResource PlayerTransparentTrackButtonStyle}" />
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="PlayerTimeTextStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource PlayerMutedTextBrush}" />
+                <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI" />
+                <Setter Property="FontSize" Value="11.5" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files"><UniqueIdentifier>{0de5b3dc-ea91-48aa-a1ee-6aa330e3a7ea}</UniqueIdentifier><Extensions>cpp;c</Extensions></Filter>
+    <Filter Include="Header Files"><UniqueIdentifier>{7f8f3e43-bd55-46a0-b155-52c2f828cb42}</UniqueIdentifier><Extensions>h;hpp</Extensions></Filter>
+    <Filter Include="Shaders"><UniqueIdentifier>{a61a0bfe-317c-4110-b39f-c6ddde24ce09}</UniqueIdentifier><Extensions>hlsl</Extensions></Filter>
+    <Filter Include="ImGui"><UniqueIdentifier>{49e68ba2-d198-43e2-9f12-9162701ee38b}</UniqueIdentifier></Filter>
+    <Filter Include="Legacy"><UniqueIdentifier>{0d5cff6d-26f0-4b8a-a95c-f70d70f82c5d}</UniqueIdentifier></Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="App.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="CockWrapper.CPP"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="LauncherDefaultsPayload.CPP"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="DX12Renderer.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="HtmlUi.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="Settings.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="ShaderEffects.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="ShaderLoader.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="Libs\imgui\imgui.cpp"><Filter>ImGui</Filter></ClCompile>
+    <ClCompile Include="Libs\imgui\imgui_draw.cpp"><Filter>ImGui</Filter></ClCompile>
+    <ClCompile Include="Libs\imgui\imgui_tables.cpp"><Filter>ImGui</Filter></ClCompile>
+    <ClCompile Include="Libs\imgui\imgui_widgets.cpp"><Filter>ImGui</Filter></ClCompile>
+    <ClCompile Include="Libs\imgui\backends\imgui_impl_dx12.cpp"><Filter>ImGui</Filter></ClCompile>
+    <ClCompile Include="Libs\imgui\backends\imgui_impl_win32.cpp"><Filter>ImGui</Filter></ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="main.hpp"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="App.hpp"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="CockWrapper.HPP"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="LauncherDefaultsPayload.HPP"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="DX12Renderer.hpp"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="HtmlUi.hpp"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Settings.hpp"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="ShaderEffects.hpp"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="ShaderLoader.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="ShaderRegistry.generated.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Libs\lucide_imgui.hpp"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Libs\poppins.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Libs\imgui\imgui.h"><Filter>ImGui</Filter></ClInclude>
+    <ClInclude Include="Libs\imgui\imgui_internal.h"><Filter>ImGui</Filter></ClInclude>
+    <ClInclude Include="Libs\imgui\backends\imgui_impl_dx12.h"><Filter>ImGui</Filter></ClInclude>
+    <ClInclude Include="Libs\imgui\backends\imgui_impl_win32.h"><Filter>ImGui</Filter></ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Fullscreen.hlsl"><Filter>Shaders</Filter></None>
+    <None Include="Shaders\Loading.hlsl"><Filter>Shaders</Filter></None>
+    <None Include="Shaders\LauncherGlow.hlsl"><Filter>Shaders</Filter></None>
+    <None Include="Shaders\Fluid.hlsl"><Filter>Shaders</Filter></None>
+    <None Include="Shaders\GeminiSmoke.hlsl"><Filter>Shaders</Filter></None>
+    <None Include="Shaders\MistGlow.hlsl"><Filter>Shaders</Filter></None>
+    <None Include="Shaders\shader(LegacyLoader).cpp"><Filter>Legacy</Filter></None>
+    <None Include="Libs\HtmlRenderer.hpp"><Filter>Legacy</Filter></None>
+  </ItemGroup>
+</Project>

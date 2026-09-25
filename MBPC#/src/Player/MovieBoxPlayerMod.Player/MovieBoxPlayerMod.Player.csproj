@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Text.Json">
+      <HintPath>..\..\..\..\MovieBoxPro\System.Text.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Encodings.Web">
+      <HintPath>..\..\..\..\MovieBoxPro\System.Text.Encodings.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="FlyleafLib">
+      <HintPath>..\..\..\..\MovieBoxPro\FlyleafLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Flyleaf.FFmpeg.Bindings">
+      <HintPath>..\..\..\..\MovieBoxPro\Flyleaf.FFmpeg.Bindings.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="tests/**/*.cs" />
+    <Compile Include="../../Shared/PlaybackProtocol.cs" Link="PlaybackProtocol.cs" />
+  </ItemGroup>
+
+</Project>
+

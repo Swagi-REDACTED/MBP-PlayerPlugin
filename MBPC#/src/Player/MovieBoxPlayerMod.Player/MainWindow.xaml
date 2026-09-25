@@ -1,0 +1,833 @@
+<Window x:Class="MovieBoxPlayerMod.Player.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:fl="clr-namespace:FlyleafLib.Controls.WPF;assembly=FlyleafLib"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="MovieBox Player"
+        Width="1280"
+        Height="720"
+        MinWidth="640"
+        MinHeight="360"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="False"
+        ResizeMode="CanResize"
+        Background="#080A0F"
+        SourceInitialized="Window_SourceInitialized"
+        Loaded="Window_Loaded"
+        Closing="Window_Closing"
+        StateChanged="Window_StateChanged"
+        Activated="Window_Activated"
+        Deactivated="Window_Deactivated"
+        PreviewKeyDown="Window_KeyDown">
+
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="0"
+                            ResizeBorderThickness="7"
+                            GlassFrameThickness="0"
+                            CornerRadius="0"
+                            UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+
+    <Grid x:Name="RootGrid" Background="Black" ClipToBounds="True">
+        <fl:FlyleafHost x:Name="PlayerHost">
+            <!--
+                FlyleafHost presents this content in its dedicated WPF overlay window.
+                OverlayRoot MUST remain hit-testable even while ControlsLayer is hidden,
+                otherwise pointer events fall through to the native Direct3D surface.
+            -->
+            <Grid x:Name="OverlayRoot"
+                  Width="{Binding ActualWidth, ElementName=PlayerHost}"
+                  Height="{Binding ActualHeight, ElementName=PlayerHost}"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  Background="#01000000"
+                  Cursor="None"
+                  ForceCursor="True"
+                  Focusable="True"
+                  PreviewMouseWheel="Window_MouseWheel"
+                  PreviewKeyDown="Window_KeyDown">
+
+                <!-- Persistent playback hit target. It never fades and sits underneath chrome. -->
+                <Border x:Name="InteractionSurface"
+                        Background="#01000000"
+                        IsHitTestVisible="True" />
+
+                <TextBlock x:Name="SubtitleText" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                           Margin="50,0,50,130" TextAlignment="Center" TextWrapping="Wrap"
+                           Foreground="White" FontSize="32" FontWeight="SemiBold" IsHitTestVisible="False">
+                    <TextBlock.Effect><DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="2" Opacity="1" /></TextBlock.Effect>
+                </TextBlock>
+                <Grid x:Name="ControlsLayer"
+                      IsHitTestVisible="True">
+
+                    <!-- Purely visual cinematic vignette; it never steals clicks. -->
+                    <Border Height="124"
+                            VerticalAlignment="Top"
+                            IsHitTestVisible="False">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#D6000000" Offset="0" />
+                                <GradientStop Color="#74000000" Offset="0.5" />
+                                <GradientStop Color="#00000000" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <Border Height="205"
+                            VerticalAlignment="Bottom"
+                            IsHitTestVisible="False">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#00000000" Offset="0" />
+                                <GradientStop Color="#4C000000" Offset="0.38" />
+                                <GradientStop Color="#D1000000" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <!-- Top chrome intentionally occupies only its real controls. Empty top-center
+                         video remains clickable through to InteractionSurface. -->
+                    <Grid x:Name="TopBar"
+                          Height="54"
+                          Margin="14,12,14,0"
+                          VerticalAlignment="Top">
+                        <Grid.RenderTransform>
+                            <TranslateTransform x:Name="TopBarTransform" Y="0" />
+                        </Grid.RenderTransform>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border x:Name="TitleDragRegion"
+                                Grid.Column="0"
+                                MaxWidth="520"
+                                HorizontalAlignment="Left"
+                                Background="{StaticResource PlayerGlassSoftBrush}"
+                                BorderBrush="{StaticResource PlayerBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="14"
+                                Padding="12,7,14,7"
+                                MouseLeftButtonDown="TopBar_MouseLeftButtonDown">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Ellipse Width="7"
+                                         Height="7"
+                                         Fill="{StaticResource PlayerAccentBrush}"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,10,0" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock x:Name="TitleText"
+                                               Text="MovieBox Player"
+                                               Foreground="{StaticResource PlayerTextBrush}"
+                                               FontFamily="Segoe UI Variable Display, Segoe UI"
+                                               FontSize="13.5"
+                                               FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock x:Name="SourceText"
+                                               Text="READY"
+                                               Foreground="{StaticResource PlayerDimTextBrush}"
+                                               FontFamily="Segoe UI Variable Text, Segoe UI"
+                                               FontSize="9.5"
+                                               FontWeight="SemiBold"
+                                               Margin="0,1,0,0"
+                                               TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border x:Name="WindowControlsPanel"
+                                Grid.Column="1"
+                                Background="{StaticResource PlayerGlassSoftBrush}"
+                                BorderBrush="{StaticResource PlayerBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="14"
+                                Padding="4">
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="MinimizeBtn"
+                                        Style="{StaticResource PlayerIconButtonStyle}"
+                                        ToolTip="Minimize"
+                                        Click="Minimize_Click"
+                                        Width="34"
+                                        Height="34">
+                                    <TextBlock Text="&#xE921;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="11" />
+                                </Button>
+                                <Button x:Name="MaximizeBtn"
+                                        Style="{StaticResource PlayerIconButtonStyle}"
+                                        ToolTip="Maximize"
+                                        Click="Maximize_Click"
+                                        Width="34"
+                                        Height="34">
+                                    <TextBlock x:Name="MaximizeGlyph"
+                                               Text="&#xE922;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="10.5" />
+                                </Button>
+                                <Button x:Name="CloseBtn"
+                                        Style="{StaticResource PlayerCloseButtonStyle}"
+                                        ToolTip="Close"
+                                        Click="Close_Click"
+                                        Width="34"
+                                        Height="34">
+                                    <TextBlock Text="&#xE8BB;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="11" />
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Floating cinema control dock. -->
+                    <Border x:Name="BottomDock"
+                            VerticalAlignment="Bottom"
+                            Margin="18,0,18,18"
+                            Padding="14,11,14,10"
+                            Background="{StaticResource PlayerGlassBrush}"
+                            BorderBrush="{StaticResource PlayerBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="18">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="26"
+                                              ShadowDepth="7"
+                                              Direction="270"
+                                              Color="#E0000000"
+                                              Opacity="0.46" />
+                        </Border.Effect>
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="BottomDockTransform" Y="0" />
+                        </Border.RenderTransform>
+
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="8" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock x:Name="CurTimeText"
+                                           Style="{StaticResource PlayerTimeTextStyle}"
+                                           Text="0:00"
+                                           MinWidth="42"
+                                           Margin="2,0,10,0" />
+
+                                <Grid x:Name="TimelineTrackHost"
+                                      Grid.Column="1"
+                                      Height="24"
+                                      ClipToBounds="False">
+                                    <Border Height="4"
+                                            VerticalAlignment="Center"
+                                            Background="{StaticResource PlayerTrackBrush}"
+                                            CornerRadius="2" />
+                                    <Border x:Name="TimelineProgressFill"
+                                            Height="4"
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Stretch"
+                                            Background="{StaticResource PlayerAccentBrush}"
+                                            CornerRadius="2"
+                                            RenderTransformOrigin="0,0.5">
+                                        <Border.RenderTransform>
+                                            <ScaleTransform x:Name="TimelineProgressScale" ScaleX="0" ScaleY="1" />
+                                        </Border.RenderTransform>
+                                    </Border>
+                                    <Slider x:Name="ProgressSlider"
+                                            Style="{StaticResource PlayerTimelineSliderStyle}"
+                                            Minimum="0"
+                                            Maximum="1"
+                                            VerticalAlignment="Center"
+                                            PreviewMouseDown="ProgressSlider_PreviewMouseDown"
+                                            PreviewMouseUp="ProgressSlider_PreviewMouseUp"
+                                            ValueChanged="ProgressSlider_ValueChanged" />
+                                </Grid>
+
+                                <TextBlock x:Name="DurationText"
+                                           Grid.Column="2"
+                                           Style="{StaticResource PlayerTimeTextStyle}"
+                                           Text="0:00"
+                                           MinWidth="42"
+                                           TextAlignment="Right"
+                                           Margin="10,0,2,0" />
+                            </Grid>
+
+                            <Grid Grid.Row="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Button x:Name="PlayPauseBtn"
+                                        Grid.Column="0"
+                                        Style="{StaticResource PlayerPrimaryButtonStyle}"
+                                        ToolTip="Play / Pause (Space or K)"
+                                        Click="PlayPauseBtn_Click"
+                                        Width="44"
+                                        Height="40"
+                                        Margin="0,0,5,0">
+                                    <TextBlock x:Name="PlayPauseGlyph"
+                                               Text="&#xE768;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="15" />
+                                </Button>
+
+                                <Button x:Name="SeekBackBtn"
+                                        Grid.Column="1"
+                                        Style="{StaticResource PlayerIconButtonStyle}"
+                                        ToolTip="Back 10 seconds (J / Left)"
+                                        Click="SeekBack_Click"
+                                        Width="42"
+                                        Height="40">
+                                    <Grid>
+                                        <TextBlock Text="↶" FontSize="21" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <TextBlock Text="10" FontSize="8" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,1,0,0" />
+                                    </Grid>
+                                </Button>
+
+                                <Button x:Name="SeekForwardBtn"
+                                        Grid.Column="2"
+                                        Style="{StaticResource PlayerIconButtonStyle}"
+                                        ToolTip="Forward 10 seconds (L / Right)"
+                                        Click="SeekForward_Click"
+                                        Width="42"
+                                        Height="40">
+                                    <Grid>
+                                        <TextBlock Text="↷" FontSize="21" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <TextBlock Text="10" FontSize="8" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,1,0,0" />
+                                    </Grid>
+                                </Button>
+
+                                <Border Grid.Column="3"
+                                        Width="1"
+                                        Height="22"
+                                        Background="#2FFFFFFF"
+                                        Margin="7,0,7,0"
+                                        VerticalAlignment="Center" />
+
+                                <Button x:Name="MuteBtn"
+                                        Grid.Column="4"
+                                        Style="{StaticResource PlayerIconButtonStyle}"
+                                        ToolTip="Mute (M)"
+                                        Click="MuteBtn_Click"
+                                        Width="42"
+                                        Height="40">
+                                    <TextBlock x:Name="MuteGlyph"
+                                               Text="&#xE767;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="16" />
+                                </Button>
+
+                                <Slider x:Name="VolumeSlider"
+                                        Grid.Column="5"
+                                        Style="{StaticResource PlayerSliderStyle}"
+                                        Minimum="0"
+                                        Maximum="100"
+                                        Value="100"
+                                        Width="102"
+                                        Margin="2,0,8,0"
+                                        VerticalAlignment="Center"
+                                        ValueChanged="VolumeSlider_ValueChanged" />
+
+                                <StackPanel Grid.Column="6" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock x:Name="HintText" Visibility="Collapsed" />
+                                    <Button x:Name="EpisodesButton"
+                                            Visibility="Collapsed"
+                                            Style="{StaticResource PlayerMenuTriggerButtonStyle}"
+                                            Click="Episodes_Click">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Path Width="13" Height="13"
+                                                  Margin="0,0,7,0"
+                                                  Stretch="Uniform"
+                                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                  StrokeThickness="1.55"
+                                                  StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round"
+                                                  Data="M2,3 H4 M5.5,3 H11 M2,6 H4 M5.5,6 H11 M2,9 H4 M5.5,9 H11" />
+                                            <TextBlock Text="Episodes"
+                                                       FontFamily="Segoe UI Variable Text, Segoe UI"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button x:Name="PlaybackButton"
+                                            Style="{StaticResource PlayerMenuTriggerButtonStyle}"
+                                            Click="PlaybackMenu_Click">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Path Width="13" Height="13"
+                                                  Margin="0,0,7,0"
+                                                  Stretch="Uniform"
+                                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                  StrokeThickness="1.55"
+                                                  StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round"
+                                                  Data="M3,3 L9,3 M3,6 L9,6 M3,9 L9,9 M5,2 L5,4 M7,5 L7,7 M5,8 L5,10" />
+                                            <TextBlock Text="Playback"
+                                                       FontFamily="Segoe UI Variable Text, Segoe UI"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+
+                                <Button x:Name="FullscreenBtn"
+                                        Grid.Column="7"
+                                        Style="{StaticResource PlayerIconButtonStyle}"
+                                        ToolTip="Fullscreen (F / F11)"
+                                        Click="Fullscreen_Click"
+                                        Width="42"
+                                        Height="40">
+                                    <TextBlock x:Name="FullscreenGlyph"
+                                               Text="&#xE740;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="15" />
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!--
+                    Episode/season menu deliberately lives in OverlayRoot, not ContextMenu/Popup.
+                    That keeps it in the same visual tree as the player so CursorCanvas (Z=1000)
+                    always renders above it and the custom cursor remains authoritative.
+                -->
+                <Canvas x:Name="PlayerMenusLayer"
+                        Panel.ZIndex="900"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch">
+                    <Canvas.Resources>
+                        <Style x:Key="EpisodeMenuChoiceStyle" TargetType="Button">
+                            <Setter Property="Foreground" Value="{StaticResource PlayerTextBrush}" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="BorderThickness" Value="1" />
+                            <Setter Property="HorizontalContentAlignment" Value="Left" />
+                            <Setter Property="Padding" Value="10,8" />
+                            <Setter Property="Margin" Value="2,1" />
+                            <Setter Property="MinHeight" Value="34" />
+                            <Setter Property="Focusable" Value="False" />
+                            <Setter Property="Cursor" Value="None" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="MenuChrome"
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="9">
+                                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                              VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="Tag" Value="Selected">
+                                                <Setter TargetName="MenuChrome" Property="Background" Value="{StaticResource PlayerMenuSelectedBrush}" />
+                                                <Setter TargetName="MenuChrome" Property="BorderBrush" Value="{StaticResource PlayerMenuBorderBrush}" />
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="MenuChrome" Property="Background" Value="{StaticResource PlayerMenuHoverBrush}" />
+                                                <Setter TargetName="MenuChrome" Property="BorderBrush" Value="{StaticResource PlayerMenuBorderBrush}" />
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter TargetName="MenuChrome" Property="Opacity" Value="0.72" />
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="MenuChrome" Property="Opacity" Value="0.42" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+
+                        <Style x:Key="EpisodeMenuScrollThumbStyle" TargetType="Thumb">
+                            <Setter Property="MinHeight" Value="26" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Thumb">
+                                        <Border x:Name="ThumbBody"
+                                                Width="6"
+                                                Margin="1"
+                                                Background="{StaticResource PlayerMenuBorderBrush}"
+                                                CornerRadius="3" />
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="ThumbBody" Property="Background" Value="{StaticResource PlayerAccentHoverBrush}" />
+                                            </Trigger>
+                                            <Trigger Property="IsDragging" Value="True">
+                                                <Setter TargetName="ThumbBody" Property="Background" Value="{StaticResource PlayerAccentBrush}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+
+                        <Style x:Key="EpisodeMenuScrollBarStyle" TargetType="ScrollBar">
+                            <Setter Property="Width" Value="8" />
+                            <Setter Property="Margin" Value="3,4,0,4" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="Focusable" Value="False" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ScrollBar">
+                                        <Grid Width="{TemplateBinding Width}" Background="Transparent">
+                                            <Track x:Name="PART_Track"
+                                                   Orientation="Vertical"
+                                                   Minimum="{TemplateBinding Minimum}"
+                                                   Maximum="{TemplateBinding Maximum}"
+                                                   Value="{TemplateBinding Value}"
+                                                   ViewportSize="{TemplateBinding ViewportSize}"
+                                                   IsDirectionReversed="True"
+                                                   Focusable="False">
+                                                <Track.DecreaseRepeatButton>
+                                                    <RepeatButton Command="{x:Static ScrollBar.PageUpCommand}"
+                                                                  CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                                                                  Focusable="False" Opacity="0" />
+                                                </Track.DecreaseRepeatButton>
+                                                <Track.Thumb>
+                                                    <Thumb Style="{StaticResource EpisodeMenuScrollThumbStyle}" />
+                                                </Track.Thumb>
+                                                <Track.IncreaseRepeatButton>
+                                                    <RepeatButton Command="{x:Static ScrollBar.PageDownCommand}"
+                                                                  CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                                                                  Focusable="False" Opacity="0" />
+                                                </Track.IncreaseRepeatButton>
+                                            </Track>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Canvas.Resources>
+
+                    <!-- Parent Episodes menu: same hierarchy as the old ContextMenu, now in-player. -->
+                    <Border x:Name="EpisodesMenuOverlay"
+                            Panel.ZIndex="900"
+                            Width="260"
+                            MaxHeight="420"
+                            Visibility="Collapsed"
+                            Background="{StaticResource PlayerMenuSurfaceBrush}"
+                            BorderBrush="{StaticResource PlayerMenuBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="16"
+                            Padding="8"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="1" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid Margin="7,2,2,7">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Episodes"
+                                               Foreground="{StaticResource PlayerTextBrush}"
+                                               FontFamily="Segoe UI Variable Display, Segoe UI"
+                                               FontSize="14"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="Select a season"
+                                               Margin="0,2,0,0"
+                                               Foreground="{StaticResource PlayerDimTextBrush}"
+                                               FontFamily="Segoe UI Variable Text, Segoe UI"
+                                               FontSize="10" />
+                                </StackPanel>
+                                <Button Grid.Column="1"
+                                        Width="28" Height="28"
+                                        Style="{StaticResource EpisodeMenuChoiceStyle}"
+                                        HorizontalContentAlignment="Center"
+                                        Padding="0"
+                                        Click="EpisodesMenuClose_Click"
+                                        Content="✕" />
+                            </Grid>
+                            <Border Grid.Row="1" Background="{StaticResource PlayerMenuBorderBrush}" Opacity="0.45" />
+                            <ScrollViewer x:Name="EpisodesMenuScrollViewer"
+                                          Grid.Row="2"
+                                          Margin="0,7,0,0"
+                                          VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled">
+                                <ScrollViewer.Resources>
+                                    <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource EpisodeMenuScrollBarStyle}" />
+                                </ScrollViewer.Resources>
+                                <StackPanel x:Name="EpisodesMenuPanel" />
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+
+                    <!-- Season submenu appears beside the parent menu, preserving the old submenu flow. -->
+                    <Border x:Name="SeasonMenuOverlay"
+                            Panel.ZIndex="910"
+                            Width="300"
+                            MaxHeight="420"
+                            Visibility="Collapsed"
+                            Background="{StaticResource PlayerMenuRailBrush}"
+                            BorderBrush="{StaticResource PlayerMenuBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="16"
+                            Padding="8"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="1" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock x:Name="SeasonMenuTitle"
+                                       Margin="9,7,9,8"
+                                       Text="Season"
+                                       Foreground="{StaticResource PlayerTextBrush}"
+                                       FontFamily="Segoe UI Variable Display, Segoe UI"
+                                       FontSize="13"
+                                       FontWeight="SemiBold" />
+                            <Border Grid.Row="1" Background="{StaticResource PlayerMenuBorderBrush}" Opacity="0.4" />
+                            <ScrollViewer x:Name="SeasonEpisodesMenuScrollViewer"
+                                          Grid.Row="2"
+                                          Margin="0,7,0,0"
+                                          VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled">
+                                <ScrollViewer.Resources>
+                                    <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource EpisodeMenuScrollBarStyle}" />
+                                </ScrollViewer.Resources>
+                                <StackPanel x:Name="SeasonEpisodesMenuPanel" />
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+
+                    <!-- Playback settings use the same in-player menu system as Episodes. -->
+                    <Border x:Name="PlaybackMenuOverlay"
+                            Panel.ZIndex="900"
+                            Width="270"
+                            MaxHeight="440"
+                            Visibility="Collapsed"
+                            Background="{StaticResource PlayerMenuSurfaceBrush}"
+                            BorderBrush="{StaticResource PlayerMenuBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="16"
+                            Padding="8"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="1" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid Margin="7,2,2,7">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Playback"
+                                               Foreground="{StaticResource PlayerTextBrush}"
+                                               FontFamily="Segoe UI Variable Display, Segoe UI"
+                                               FontSize="14"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="Player options"
+                                               Margin="0,2,0,0"
+                                               Foreground="{StaticResource PlayerDimTextBrush}"
+                                               FontFamily="Segoe UI Variable Text, Segoe UI"
+                                               FontSize="10" />
+                                </StackPanel>
+                                <Button Grid.Column="1"
+                                        Width="28" Height="28"
+                                        Style="{StaticResource EpisodeMenuChoiceStyle}"
+                                        HorizontalContentAlignment="Center"
+                                        Padding="0"
+                                        Click="PlaybackMenuClose_Click"
+                                        Content="✕" />
+                            </Grid>
+                            <Border Grid.Row="1" Background="{StaticResource PlayerMenuBorderBrush}" Opacity="0.45" />
+                            <ScrollViewer x:Name="PlaybackMenuScrollViewer"
+                                          Grid.Row="2"
+                                          Margin="0,7,0,0"
+                                          VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled">
+                                <ScrollViewer.Resources>
+                                    <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource EpisodeMenuScrollBarStyle}" />
+                                </ScrollViewer.Resources>
+                                <StackPanel x:Name="PlaybackMenuPanel" />
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+
+                    <Border x:Name="PlaybackSubmenuOverlay"
+                            Panel.ZIndex="910"
+                            Width="310"
+                            MaxHeight="440"
+                            Visibility="Collapsed"
+                            Background="{StaticResource PlayerMenuRailBrush}"
+                            BorderBrush="{StaticResource PlayerMenuBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="16"
+                            Padding="8"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="1" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock x:Name="PlaybackSubmenuTitle"
+                                       Margin="9,7,9,8"
+                                       Text="Playback"
+                                       Foreground="{StaticResource PlayerTextBrush}"
+                                       FontFamily="Segoe UI Variable Display, Segoe UI"
+                                       FontSize="13"
+                                       FontWeight="SemiBold" />
+                            <Border Grid.Row="1" Background="{StaticResource PlayerMenuBorderBrush}" Opacity="0.4" />
+                            <ScrollViewer x:Name="PlaybackSubmenuScrollViewer"
+                                          Grid.Row="2"
+                                          Margin="0,7,0,0"
+                                          VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled">
+                                <ScrollViewer.Resources>
+                                    <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource EpisodeMenuScrollBarStyle}" />
+                                </ScrollViewer.Resources>
+                                <StackPanel x:Name="PlaybackSubmenuPanel" />
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+                </Canvas>
+
+                <!-- Open/error feedback remains available even if chrome is hidden. -->
+                <Border x:Name="StatusPanel"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="#E513161C"
+                        BorderBrush="#36FFFFFF"
+                        BorderThickness="1"
+                        CornerRadius="16"
+                        Padding="20,16"
+                        Opacity="0"
+                        IsHitTestVisible="False">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="24" ShadowDepth="5" Color="Black" Opacity="0.45" />
+                    </Border.Effect>
+                    <StackPanel>
+                        <TextBlock x:Name="StatusText"
+                                   Text="Opening video…"
+                                   Foreground="{StaticResource PlayerTextBrush}"
+                                   FontFamily="Segoe UI Variable Display, Segoe UI"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Center" />
+                        <ProgressBar x:Name="StatusProgress"
+                                     IsIndeterminate="True"
+                                     Width="184"
+                                     Height="3"
+                                     Margin="0,11,0,0"
+                                     Foreground="{StaticResource PlayerAccentBrush}"
+                                     Background="#2DFFFFFF" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Brief play/pause/seek/volume action feedback. -->
+                <Border x:Name="CenterFeedback"
+                        Width="82"
+                        Height="82"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="#C312151A"
+                        BorderBrush="#38FFFFFF"
+                        BorderThickness="1"
+                        CornerRadius="24"
+                        Opacity="0"
+                        RenderTransformOrigin="0.5,0.5"
+                        IsHitTestVisible="False">
+                    <Border.RenderTransform>
+                        <ScaleTransform x:Name="CenterFeedbackScale" ScaleX="0.9" ScaleY="0.9" />
+                    </Border.RenderTransform>
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="22" ShadowDepth="4" Color="Black" Opacity="0.42" />
+                    </Border.Effect>
+                    <TextBlock x:Name="CenterFeedbackText"
+                               Text="▶"
+                               Foreground="White"
+                               FontFamily="Segoe UI Variable Display, Segoe UI"
+                               FontSize="27"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+                </Border>
+
+                <!--
+                    Precision cinema cursor: deliberately not a Windows arrow.
+                    It stays small over video and blooms slightly over interactive chrome.
+                -->
+                <Canvas x:Name="CursorCanvas"
+                        Width="{Binding ActualWidth, ElementName=PlayerHost}"
+                        Height="{Binding ActualHeight, ElementName=PlayerHost}"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Panel.ZIndex="1000"
+                        IsHitTestVisible="False">
+                    <Grid x:Name="CustomCursor"
+                          Width="28"
+                          Height="28"
+                          Opacity="0"
+                          SnapsToDevicePixels="True"
+                          RenderTransformOrigin="0.5,0.5">
+                        <Grid.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform x:Name="CustomCursorScale" ScaleX="0.74" ScaleY="0.74" />
+                                <TranslateTransform x:Name="CustomCursorTranslate" />
+                            </TransformGroup>
+                        </Grid.RenderTransform>
+
+                        <!-- Cheap vector depth: no blur/effect pass. -->
+                        <Ellipse x:Name="CursorShadow"
+                                 Width="17"
+                                 Height="17"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"
+                                 Fill="#10000000"
+                                 Stroke="#60000000"
+                                 StrokeThickness="2.6" />
+
+                        <Ellipse x:Name="CursorHalo"
+                                 Width="14"
+                                 Height="14"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"
+                                 Fill="#120B0E13"
+                                 Stroke="#F2FFFFFF"
+                                 StrokeThickness="1.2" />
+
+                        <Path Data="M 14,3.5 L 14,7 M 14,21 L 14,24.5 M 3.5,14 L 7,14 M 21,14 L 24.5,14"
+                              Stroke="#C8FFFFFF"
+                              StrokeThickness="0.9"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round" />
+
+                        <Ellipse x:Name="CursorCore"
+                                 Width="3.6"
+                                 Height="3.6"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"
+                                 Fill="{StaticResource PlayerAccentBrush}" />
+                    </Grid>
+                </Canvas>
+            </Grid>
+        </fl:FlyleafHost>
+    </Grid>
+</Window>

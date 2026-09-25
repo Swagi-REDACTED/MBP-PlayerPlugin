@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Hook/">
+    <Project Path="src/Hook/MovieBoxPlayerMod.Hook/MovieBoxPlayerMod.Hook.csproj" />
+  </Folder>
+  <Folder Name="/src/Player/">
+    <Project Path="src/Player/MovieBoxPlayerMod.Player/MovieBoxPlayerMod.Player.csproj" />
+  </Folder>
+</Solution>
