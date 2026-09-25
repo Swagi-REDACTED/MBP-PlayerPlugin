@@ -44,7 +44,7 @@ enum AppMode {
 };
 
 struct PlayerSettings {
-    int engineMode = 0;      // 0 = Custom DirectShow, 1 = VLC Texture
+    int engineMode = 1;      // 0 = Custom DirectShow, 1 = VLC Texture
     int hwDecoding = 1;
     float volume = 1.0f;
     float progress = 0.0f;
